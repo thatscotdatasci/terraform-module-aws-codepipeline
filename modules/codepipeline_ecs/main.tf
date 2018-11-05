@@ -3,7 +3,7 @@ resource "aws_codepipeline" "this" {
   role_arn = "${var.iam_role_arn}"
 
   artifact_store {
-    location = ""
+    location = "${var.s3_artifact_bucket_arn}"
     type     = "S3"
   }
 
@@ -51,7 +51,7 @@ resource "aws_codepipeline" "this" {
 
     action {
       name            = "Deploy"
-      category        = "Invoke"
+      category        = "Deploy"
       owner           = "AWS"
       provider        = "ECS"
       input_artifacts = ["CompiledCode"]

@@ -6,6 +6,10 @@ variable "iam_role_arn" {
   description = "ARN of the IAM role used to run the pipeline"
 }
 
+variable "s3_artifact_bucket_arn" {
+  description = "ARN of the S3 bucket which will contain the artifact once built"
+}
+
 variable "github_owner" {
   description = "Owner of the GitHub repo containing the source code to be built"
 }
