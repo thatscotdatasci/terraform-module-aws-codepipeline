@@ -11,18 +11,21 @@ resource "aws_codepipeline" "this" {
     name = "Source"
 
     action {
-      name             = "Source"
-      category         = "Source"
-      owner            = "ThirdParty"
-      provider         = "GitHub"
-      version          = "1"
-      output_artifacts = ["SourceCode"]
+      name     = "Source"
+      category = "Source"
+      owner    = "ThirdParty"
+      provider = "GitHub"
+      version  = "1"
+
+      output_artifacts = [
+        "SourceCode",
+      ]
 
       configuration {
         Owner                = "${var.github_owner}"
         Repo                 = "${var.github_repo}"
         Branch               = "${var.github_branch}"
-        PollForSourceChanges = "${var.github_poll}"
+        PollForSourceChanges = "${var.implement_webhook == true ? false : true}"
         OAuthToken           = "${var.github_oauth}"
       }
     }
@@ -32,13 +35,20 @@ resource "aws_codepipeline" "this" {
     name = "Build"
 
     action {
-      name            = "Build"
-      category        = "Build"
-      owner           = "AWS"
-      provider        = "CodeBuild"
-      input_artifacts = ["SourceCode"]
-      output_artifacts = ["CompiledCode"]
-      version         = "1"
+      name     = "Build"
+      category = "Build"
+      owner    = "AWS"
+      provider = "CodeBuild"
+
+      input_artifacts = [
+        "SourceCode",
+      ]
+
+      output_artifacts = [
+        "CompiledCode",
+      ]
+
+      version = "1"
 
       configuration {
         ProjectName = "${var.codebuild_name}"
@@ -50,15 +60,19 @@ resource "aws_codepipeline" "this" {
     name = "Deploy"
 
     action {
-      name            = "Deploy"
-      category        = "Deploy"
-      owner           = "AWS"
-      provider        = "ECS"
-      input_artifacts = ["CompiledCode"]
-      version         = "1"
+      name     = "Deploy"
+      category = "Deploy"
+      owner    = "AWS"
+      provider = "ECS"
+
+      input_artifacts = [
+        "CompiledCode",
+      ]
+
+      version = "1"
 
       configuration {
-        ClusterName = "${var.ecs_cluster_name}",
+        ClusterName = "${var.ecs_cluster_name}"
         ServiceName = "${var.ecs_service_name}"
       }
     }
@@ -66,7 +80,7 @@ resource "aws_codepipeline" "this" {
 }
 
 resource "aws_codepipeline_webhook" "this" {
-  count = "${var.implement_webhook == "true" ? 1: 0}"
+  count           = "${var.implement_webhook == true ? 1 : 0}"
   name            = "${var.codepipeline_name}-webhook"
   authentication  = "GITHUB_HMAC"
   target_action   = "Source"
@@ -83,7 +97,7 @@ resource "aws_codepipeline_webhook" "this" {
 }
 
 resource "github_repository_webhook" "this" {
-  count = "${var.implement_webhook == "true" ? 1: 0}"
+  count      = "${var.implement_webhook == true ? 1 : 0}"
   repository = "${var.github_repo}"
 
   name = "web"
@@ -94,5 +108,8 @@ resource "github_repository_webhook" "this" {
     insecure_ssl = true
     secret       = "${var.webhook_secret}"
   }
-  events = ["push"]
+
+  events = [
+    "push",
+  ]
 }
