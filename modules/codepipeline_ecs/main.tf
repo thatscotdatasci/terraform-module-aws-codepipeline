@@ -25,7 +25,7 @@ resource "aws_codepipeline" "this" {
         Owner                = "${var.github_owner}"
         Repo                 = "${var.github_repo}"
         Branch               = "${var.github_branch}"
-        PollForSourceChanges = "${var.implement_webhook == true ? false : true}"
+        PollForSourceChanges = "${var.github_poll}"
         OAuthToken           = "${var.github_oauth}"
       }
     }
@@ -105,7 +105,7 @@ resource "github_repository_webhook" "this" {
   configuration {
     url          = "${aws_codepipeline_webhook.this.url}"
     content_type = "form"
-    insecure_ssl = true
+    insecure_ssl = false
     secret       = "${var.webhook_secret}"
   }
 

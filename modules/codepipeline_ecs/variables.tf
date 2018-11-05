@@ -45,7 +45,7 @@ variable "ecs_service_name" {
 
 variable "implement_webhook" {
   description = "Enable the creation of CodePipeline Webhook"
-  default = true
+  default = false
 }
 
 variable "webhook_secret" {
