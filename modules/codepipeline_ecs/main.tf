@@ -64,3 +64,35 @@ resource "aws_codepipeline" "this" {
     }
   }
 }
+
+resource "aws_codepipeline_webhook" "this" {
+  count = "${var.implement_webhook == "true" ? 1: 0}"
+  name            = "${var.codepipeline_name}-webhook"
+  authentication  = "GITHUB_HMAC"
+  target_action   = "Source"
+  target_pipeline = "${aws_codepipeline.this.name}"
+
+  authentication_configuration {
+    secret_token = "${var.webhook_secret}"
+  }
+
+  filter {
+    json_path    = "$.ref"
+    match_equals = "refs/heads/{Branch}"
+  }
+}
+
+resource "github_repository_webhook" "this" {
+  count = "${var.implement_webhook == "true" ? 1: 0}"
+  repository = "${var.github_repo}"
+
+  name = "web"
+
+  configuration {
+    url          = "${aws_codepipeline_webhook.this.url}"
+    content_type = "form"
+    insecure_ssl = true
+    secret       = "${var.webhook_secret}"
+  }
+  events = ["push"]
+}

@@ -42,3 +42,13 @@ variable "ecs_cluster_name" {
 variable "ecs_service_name" {
   description = "User parameters to be passed to the Lambda function which will deploy the built code"
 }
+
+variable "implement_webhook" {
+  description = "Enable the creation of CodePipeline Webhook"
+  default = true
+}
+
+variable "webhook_secret" {
+  description = "A shared secret between GitHub and AWS that allows AWS CodePipeline to authenticate the request came from GitHub"
+  default = ""
+}
